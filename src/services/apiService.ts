@@ -126,9 +126,54 @@ export const apiService = {
 
     const data = await response.json();
 
-    // Extract response
-    if (serverId === 'cohere') return data.text || 'No response';
-    return data.choices?.[0]?.message?.content || 'No response';
+    // Extract response - handle various API response formats
+    let content = '';
+
+    // Standard OpenAI-compatible format
+    if (data.choices?.[0]?.message?.content) {
+      content = data.choices[0].message.content;
+    }
+    // Alternative format with text field
+    else if (data.choices?.[0]?.text) {
+      content = data.choices[0].text;
+    }
+    // StreamLake/DeepSeek format with choices array
+    else if (data.choices?.[0]?.delta?.content) {
+      content = data.choices[0].delta.content;
+    }
+    // Generic choices array iteration
+    else if (data.choices && data.choices.length > 0) {
+      const firstChoice = data.choices[0];
+      content = firstChoice.message?.content || firstChoice.delta?.content || firstChoice.text || '';
+    }
+    // Response as direct string
+    else if (typeof data === 'string') {
+      content = data;
+    }
+    // Response with response or text field at root
+    else if (data.response) {
+      content = typeof data.response === 'string' ? data.response : data.response.choices?.[0]?.message?.content || JSON.stringify(data.response);
+    }
+    else if (data.text) {
+      content = data.text;
+    }
+
+    // Clean up content - remove any JSON metadata that might be included
+    if (content && typeof content === 'string') {
+      // Check if content starts with JSON-like pattern and try to extract actual text
+      const jsonMatch = content.match(/^\s*\{.*\}\s*$/);
+      if (jsonMatch && !content.includes('\n') && content.length < 500) {
+        try {
+          const parsed = JSON.parse(content);
+          // If it's JSON, try to extract meaningful content
+          content = parsed.content || parsed.message || parsed.text || parsed.choices?.[0]?.message?.content || parsed.choices?.[0]?.text || content;
+        } catch {
+          // Not valid JSON, keep original
+        }
+      }
+    }
+
+    return content || 'No response';
   },
 
   getEndpoint: (serverId: string): string | undefined => API_ENDPOINTS[serverId]?.url,

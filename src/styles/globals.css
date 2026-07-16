@@ -488,14 +488,294 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; letter-spacing: -0.02em; }
 .dialog-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.dialog-advanced {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 3rem;
+  text-align: center;
+  max-width: 480px;
+  width: 90%;
+  position: relative;
+  overflow: hidden;
+  animation: dialogIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Particle Background */
+.dialog-particles {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--gradient);
+  border-radius: 50%;
+  opacity: 0;
+  animation: particleFloat 3s infinite ease-in-out;
+}
+
+@keyframes particleFloat {
+  0%, 100% { opacity: 0; transform: translateY(0) scale(0); }
+  10% { opacity: 0.8; transform: translateY(-10px) scale(1); }
+  90% { opacity: 0.3; transform: translateY(-40px) scale(0.5); }
+}
+
+/* Icon with Glow Effect */
+.dialog-icon-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 1.5rem;
+}
+
+.dialog-icon-inner {
+  font-size: 4.5rem;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+
+.dialog-icon-wrapper.glow-1 .dialog-icon-inner { filter: drop-shadow(0 0 20px rgba(124, 58, 237, 0.5)); }
+.dialog-icon-wrapper.glow-2 .dialog-icon-inner { filter: drop-shadow(0 0 30px rgba(8, 145, 178, 0.6)); transform: scale(1.05); }
+.dialog-icon-wrapper.glow-3 .dialog-icon-inner { filter: drop-shadow(0 0 25px rgba(124, 58, 237, 0.4)); }
+.dialog-icon-wrapper.glow-4 .dialog-icon-inner { filter: drop-shadow(0 0 35px rgba(8, 145, 178, 0.7)); transform: scale(1.08); }
+
+/* Advanced Progress Bar */
+.advanced-progress {
+  position: relative;
+  padding: 1rem 0;
+}
+
+.progress-track {
+  height: 8px;
+  background: var(--bg-secondary);
+  border-radius: 999px;
+  overflow: visible;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gradient);
+  border-radius: 999px;
+  transition: width 0.3s ease-out;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.progress-glow {
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  background: var(--gradient);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.6);
+  transition: left 0.3s ease-out;
+}
+
+/* Stage Indicators */
+.progress-stages {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  padding: 0 0.5rem;
+}
+
+.stage-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-size: 0.7rem;
+}
+
+.stage-dot.active {
+  background: var(--gradient);
+  border-color: var(--primary);
+  color: white;
+  transform: scale(1.1);
+}
+
+.stage-dot.completed {
+  background: var(--success);
+  border-color: var(--success);
+}
+
+.stage-dot.completed i {
+  font-size: 0.6rem;
+}
+
+/* Loading Rings */
+.loading-rings {
+  width: 60px;
+  height: 60px;
+  position: relative;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  border: 3px solid transparent;
+  border-radius: 50%;
+  animation: ringSpin 2s ease-in-out infinite;
+}
+
+.ring-1 {
+  border-top-color: var(--primary);
+  animation-delay: 0s;
+}
+
+.ring-2 {
+  inset: 8px;
+  border-right-color: var(--accent);
+  animation-delay: 0.2s;
+  animation-direction: reverse;
+}
+
+.ring-3 {
+  inset: 16px;
+  border-bottom-color: var(--primary-light);
+  animation-delay: 0.4s;
+}
+
+@keyframes ringSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Result Animation */
+.result-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 3rem;
+  color: white;
+  animation: resultPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.result-icon.success {
+  background: linear-gradient(135deg, #059669, #10b981);
+  box-shadow: 0 10px 40px rgba(5, 150, 105, 0.4);
+}
+
+.result-icon.error {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  box-shadow: 0 10px 40px rgba(220, 38, 38, 0.4);
+}
+
+@keyframes resultPop {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.dialog-title-animated {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  animation: slideUp 0.5s ease 0.2s both;
+}
+
+.dialog-text-animated {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+  animation: slideUp 0.5s ease 0.3s both;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: slideUp 0.5s ease 0.4s both;
+}
+
+.btn-ghost-animated {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+  padding: 0.875rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-ghost-animated:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
+}
+
+.btn-gradient-animated {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border: none;
+  color: white;
+  padding: 0.875rem 2rem;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.3);
+}
+
+.btn-gradient-animated:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(124, 58, 237, 0.4);
+}
+
+/* Legacy styles */
 .dialog {
   background: #ffffff;
   border-radius: var(--radius-xl);
