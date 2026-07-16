@@ -276,7 +276,87 @@ export const apiService = {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `API Error: ${response.status}`);
+        const errorMessage = errorData.error?.message || errorData.message || errorData.error?.type || '';
+        const errorCode = errorData.error?.code || '';
+        const errorStatus = response.status;
+        
+        // ===== API Key Expired / Invalid Errors =====
+        if (
+          errorMessage.includes('api_key_expired') || 
+          errorMessage.includes('API key has expired') ||
+          errorMessage.includes('expired') ||
+          errorCode.includes('expired') ||
+          errorMessage.includes('key_expired')
+        ) {
+          throw new Error(`❌ API သော့ သက်တမ်းကုန်သွားပါပြီ။\n\nသင်၏ API သော့သည် သက်တမ်းလွန်နေပါပြီ။\n\n🔧 ဖြေရှင်းနည်း: API သော့အသစ်ထုတ်ယူပြီး ပြန်လည်ကြိုးစားပါ။`);
+        }
+
+        // ===== Invalid API Key Errors =====
+        if (
+          errorMessage.includes('invalid_api_key') || 
+          errorMessage.includes('Incorrect API key') ||
+          errorMessage.includes('invalid api key') ||
+          errorCode.includes('invalid_api_key') ||
+          errorMessage.includes('api_key_invalid')
+        ) {
+          throw new Error(`❌ API Key Error!\n\nYour API key is invalid or incorrect.\n\n🔧 Solution: Please check and re-enter your API key.`);
+        }
+
+        // ===== No Endpoints / Model Not Found =====
+        if (
+          errorMessage.includes('No endpoints found') || 
+          errorMessage.includes('model not found') ||
+          errorMessage.includes('model_not_found') ||
+          errorCode.includes('model_not_found') ||
+          errorMessage.includes('no valid routes')
+        ) {
+          throw new Error(`❌ Model မရရှိနိုင်ပါ။\n\n"${model}" သည် သင်၏ API အကောင့်တွင် ရရှိနိုင်မှုမရှိပါ။\n\n🔧 ဖြေရှင်းနည်း: \n• အခြား Model တစ်ခုကို ရွေးချယ်ပါ\n• OpenRouter တွင် Credits ထည့်သွင်းပါ\n• Free tier Model များဖြစ်သော Gemma, Llama စသည်တို့ကို စမ်းသုံးကြည့်ပါ`);
+        }
+
+        // ===== Rate Limit Errors =====
+        if (
+          errorMessage.includes('rate_limit') || 
+          errorMessage.includes('Rate limit') ||
+          errorMessage.includes('rate limit exceeded') ||
+          errorCode.includes('rate_limit') ||
+          errorMessage.includes('too many requests')
+        ) {
+          throw new Error(`⏳ Rate Limit ကျော်လွန်သွားပါပြီ။\n\nသင်အသုံးပြုမှုပမာဏသည် ကန့်သတ်ချက်ထက် မြင့်တက်သွားပါပြီ။\n\n🔧 ဖြေရှင်းနည်း: ခဏစောင့်ဆိုင်းပြီးနောက် ပြန်လည်ကြိုးစားပါ။`);
+        }
+
+        // ===== Insufficient Quota / Credits =====
+        if (
+          errorMessage.includes('insufficient_quota') || 
+          errorMessage.includes('quota') ||
+          errorMessage.includes('Insufficient credits') ||
+          errorMessage.includes('not enough credits') ||
+          errorCode.includes('quota')
+        ) {
+          throw new Error(`💰 API သော့ Quota ကုန်ဆုံးသွားပါပြီ။\n\nသင်၏ API အကောင့်တွင် လက်ကျန်ငွေမရှိတော့ပါ။\n\n🔧 ဖြေရှင်းနည်း: သင်၏ API အကောင့်တွင် ငွေကြေးထည့်သွင်းပါ။`);
+        }
+
+        // ===== 401 Unauthorized =====
+        if (errorStatus === 401) {
+          throw new Error(`🔐 API သော့ တရားဝင်မဟုတ်ပါ။\n\nဤ API သော့သည် တရားဝင်မှုမရှိတော့ပါ (401 Unauthorized)။\n\n🔧 ဖြေရှင်းနည်း: API သော့အသစ်ထုတ်ယူပါ။`);
+        }
+
+        // ===== 403 Forbidden =====
+        if (errorStatus === 403) {
+          throw new Error(`🚫 ဝင်ခွင့်ငြင်းပယ်ခြင်း။\n\nဤ API သော့မှာ ဤဆောင်ရွက်မှုအတွက် ခွင့်မပြုပါ (403 Forbidden)။\n\n🔧 ဖြေရှင်းနည်း: API သော့၏ ခွင့်ပြုချက်များကို စစ်ဆေးပါ။`);
+        }
+
+        // ===== 429 Too Many Requests =====
+        if (errorStatus === 429) {
+          throw new Error(`⏰ တောင်းဆိုမှုအရမ်းများနေပါသည်။\n\nသင်၏ တောင်းဆိုမှုများသည် အရမ်းများနေပါပြီ (429 Too Many Requests)။\n\n🔧 ဖြေရှင်းနည်း: ခဏစောင့်ဆိုင်းပြီးနောက် ပြန်လည်ကြိုးစားပါ။`);
+        }
+
+        // ===== 500 Internal Server Error =====
+        if (errorStatus >= 500) {
+          throw new Error(`🛠️ Server အမှားဖြစ်ပါသည်။\n\nAPI Provider Server မှာ အမှားဖြစ်နေပါ (${errorStatus} Internal Server Error)။\n\n🔧 ဖြေရှင်းနည်း: ခဏစောင့်ဆိုင်းပြီးနောက် ပြန်လည်ကြိုးစားပါ။`);
+        }
+
+        // ===== Default Error =====
+        throw new Error(`⚠️ API Error (${errorStatus}): ${errorMessage || 'အမည်မသိအမှားဖြစ်ပါသည်။'}`);
       }
 
       const data = await response.json();
