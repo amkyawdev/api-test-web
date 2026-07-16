@@ -1,44 +1,19 @@
 import type { Message } from '../../types/common.types';
 
-interface MessageBubbleProps {
-  message: Message;
-}
-
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
+const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
   const isUser = message.role === 'user';
-
-  const formatTime = (date: Date) => {
-    return new Date(date).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
-  };
+  const formatTime = (date: Date) => new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className={`d-flex ${isUser ? 'justify-content-end' : 'justify-content-start'} mb-3`}>
-      <div className={`message-bubble ${isUser ? 'message-user' : 'message-assistant'}`}>
-        <div className="d-flex align-items-start gap-2">
-          {!isUser && (
-            <i className="bi bi-robot mt-1"></i>
-          )}
-          <div className="flex-grow-1">
-            <div className="message-content" style={{ whiteSpace: 'pre-wrap' }}>
-              {message.content}
-            </div>
-            <div className="mt-2 d-flex align-items-center gap-2">
-              <small className={`${isUser ? 'opacity-75' : 'text-secondary'}`}>
-                {formatTime(message.timestamp)}
-              </small>
-              {message.model && !isUser && (
-                <small className="badge bg-secondary">
-                  {message.model}
-                </small>
-              )}
-            </div>
-          </div>
-          {isUser && (
-            <i className="bi bi-person mt-1"></i>
-          )}
+    <div className={`message ${isUser ? 'user' : 'assistant'}`}>
+      <div className="message-avatar">
+        <i className={`bi ${isUser ? 'bi-person' : 'bi-robot'}`}></i>
+      </div>
+      <div className="message-content">
+        <div className="message-text">{message.content}</div>
+        <div className="message-time">
+          {formatTime(message.timestamp)}
+          {message.model && !isUser && <span className="badge bg-secondary ms-2" style={{ fontSize: '0.65rem' }}>{message.model}</span>}
         </div>
       </div>
     </div>

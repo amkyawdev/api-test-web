@@ -10,25 +10,13 @@ interface ChatHeaderProps {
   onToggleSidebar: () => void;
 }
 
-const ChatHeader: React.FC<ChatHeaderProps> = ({
-  server,
-  selectedModel,
-  models,
-  onModelChange,
-  showModelDropdown,
-  setShowModelDropdown,
-  onToggleSidebar,
-}) => {
+const ChatHeader: React.FC<ChatHeaderProps> = ({ server, selectedModel, models, onModelChange, showModelDropdown, setShowModelDropdown, onToggleSidebar }) => {
   return (
-    <div className="chat-header bg-card p-3 border-bottom border-secondary d-flex align-items-center justify-content-between">
+    <div className="chat-header d-flex align-items-center justify-content-between">
       <div className="d-flex align-items-center gap-3">
-        <button 
-          className="btn btn-sm btn-outline-custom d-md-none"
-          onClick={onToggleSidebar}
-        >
+        <button className="btn btn-icon btn-ghost d-md-none" onClick={onToggleSidebar}>
           <i className="bi bi-list"></i>
         </button>
-
         {server && (
           <div className="d-flex align-items-center gap-2">
             <span style={{ fontSize: '1.5rem' }}>{server.icon}</span>
@@ -40,56 +28,27 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
         )}
       </div>
 
-      <div className="model-dropdown position-relative">
-        <button
-          className="btn btn-outline-custom btn-sm-custom dropdown-toggle"
-          type="button"
-          onClick={() => setShowModelDropdown(!showModelDropdown)}
-          aria-expanded={showModelDropdown}
-        >
-          <i className="bi bi-cpu me-2"></i>
+      <div className="model-dropdown">
+        <button className="model-btn" onClick={() => setShowModelDropdown(!showModelDropdown)}>
+          <i className="bi bi-cpu"></i>
           {selectedModel?.name || 'Select Model'}
+          <i className="bi bi-chevron-down ms-2"></i>
         </button>
 
         {showModelDropdown && (
           <>
-            <div 
-              className="position-fixed top-0 start-0 w-100 h-100"
-              onClick={() => setShowModelDropdown(false)}
-              style={{ zIndex: 1 }}
-            />
-            <ul 
-              className="dropdown-menu show position-absolute end-0 mt-2"
-              style={{ zIndex: 2, minWidth: '250px' }}
-            >
-              <li>
-                <h6 className="dropdown-header text-secondary">
-                  <i className="bi bi-robot me-2"></i>
-                  Select Model
-                </h6>
-              </li>
+            <div className="position-fixed top-0 start-0 w-100 h-100" onClick={() => setShowModelDropdown(false)} style={{ zIndex: 1 }} />
+            <div className="model-menu" style={{ zIndex: 2 }}>
+              <div className="p-3" style={{ borderBottom: '1px solid var(--border)' }}>
+                <h6 className="mb-0 text-secondary"><i className="bi bi-robot me-2"></i>Select Model</h6>
+              </div>
               {models.map((model) => (
-                <li key={model.id}>
-                  <button
-                    className={`dropdown-item d-flex justify-content-between align-items-start ${
-                      selectedModel?.id === model.id ? 'active' : ''
-                    }`}
-                    onClick={() => {
-                      onModelChange(model.id);
-                      setShowModelDropdown(false);
-                    }}
-                  >
-                    <div>
-                      <div className="fw-semibold">{model.name}</div>
-                      <small className="text-secondary">{model.description}</small>
-                    </div>
-                    {selectedModel?.id === model.id && (
-                      <i className="bi bi-check text-primary"></i>
-                    )}
-                  </button>
-                </li>
+                <div key={model.id} className={`model-item ${selectedModel?.id === model.id ? 'active' : ''}`} onClick={() => { onModelChange(model.id); setShowModelDropdown(false); }}>
+                  <div className="fw-semibold">{model.name}</div>
+                  <small className="text-secondary">{model.description}</small>
+                </div>
               ))}
-            </ul>
+            </div>
           </>
         )}
       </div>

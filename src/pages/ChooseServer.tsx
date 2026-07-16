@@ -11,7 +11,7 @@ const ChooseServer: React.FC = () => {
   return (
     <div className="container py-5">
       <div className="text-center mb-5">
-        <h1 className="display-5 fw-bold mb-3">
+        <h1 className="display-title mb-3">
           <i className="bi bi-server me-2"></i>
           Choose Your Server
         </h1>
@@ -20,25 +20,17 @@ const ChooseServer: React.FC = () => {
         </p>
       </div>
 
-      <div className="row g-4 justify-content-center">
+      <div className="server-grid">
         {SERVERS.map((server) => (
-          <div key={server.id} className="col-6 col-md-4 col-lg-3">
-            <div 
-              className="server-card h-100"
-              onClick={() => handleServerSelect(server.id)}
-              role="button"
-              tabIndex={0}
-              onKeyPress={(e) => e.key === 'Enter' && handleServerSelect(server.id)}
-            >
-              <div className="server-icon">{server.icon}</div>
-              <h3 className="server-name">{server.name}</h3>
-              <p className="server-description">{server.description}</p>
-              <div className="mt-3">
-                <small className="text-secondary">
-                  {server.models.length} models available
-                </small>
-              </div>
-            </div>
+          <div 
+            key={server.id} 
+            className="server-card"
+            onClick={() => handleServerSelect(server.id)}
+          >
+            <span className="server-icon">{server.icon}</span>
+            <h3 className="server-name">{server.name}</h3>
+            <p className="server-desc">{server.description}</p>
+            <span className="server-models">{server.models.length} models</span>
           </div>
         ))}
       </div>
