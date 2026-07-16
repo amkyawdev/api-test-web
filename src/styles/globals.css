@@ -981,11 +981,65 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; letter-spacing: -0.02em; }
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   min-width: 280px;
-  max-height: 350px;
-  overflow-y: auto;
+  max-height: 400px;
+  overflow: hidden;
   z-index: 100;
   box-shadow: var(--shadow-lg);
   animation: dropdownIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.model-menu-header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  position: sticky;
+  top: 0;
+}
+
+.model-menu-header h6 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.model-menu-header .model-count {
+  font-size: 0.7rem;
+  background: var(--bg-glass);
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  color: var(--primary-light);
+}
+
+.model-btn-name {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.model-list {
+  max-height: calc(400px - 50px);
+  overflow-y: auto;
+}
+
+.model-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.model-list::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.model-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.model-list::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
 }
 
 @keyframes dropdownIn {

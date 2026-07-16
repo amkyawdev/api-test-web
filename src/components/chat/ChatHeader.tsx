@@ -31,7 +31,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ server, selectedModel, models, 
       <div className="model-dropdown">
         <button className="model-btn" onClick={() => setShowModelDropdown(!showModelDropdown)}>
           <i className="bi bi-cpu"></i>
-          {selectedModel?.name || 'Select Model'}
+          <span className="model-btn-name">{selectedModel?.name || 'Select Model'}</span>
           <i className="bi bi-chevron-down ms-2"></i>
         </button>
 
@@ -39,15 +39,20 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ server, selectedModel, models, 
           <>
             <div className="position-fixed top-0 start-0 w-100 h-100" onClick={() => setShowModelDropdown(false)} style={{ zIndex: 1 }} />
             <div className="model-menu" style={{ zIndex: 2 }}>
-              <div className="p-3" style={{ borderBottom: '1px solid var(--border)' }}>
-                <h6 className="mb-0 text-secondary"><i className="bi bi-robot me-2"></i>Select Model</h6>
+              <div className="model-menu-header">
+                <h6>
+                  <span><i className="bi bi-robot me-2"></i>Select Model</span>
+                  <span className="model-count">{models.length} models</span>
+                </h6>
               </div>
-              {models.map((model) => (
-                <div key={model.id} className={`model-item ${selectedModel?.id === model.id ? 'active' : ''}`} onClick={() => { onModelChange(model.id); setShowModelDropdown(false); }}>
-                  <div className="fw-semibold">{model.name}</div>
-                  <small className="text-secondary">{model.description}</small>
-                </div>
-              ))}
+              <div className="model-list">
+                {models.map((model) => (
+                  <div key={model.id} className={`model-item ${selectedModel?.id === model.id ? 'active' : ''}`} onClick={() => { onModelChange(model.id); setShowModelDropdown(false); }}>
+                    <div className="fw-semibold">{model.name}</div>
+                    <small className="text-secondary">{model.description}</small>
+                  </div>
+                ))}
+              </div>
             </div>
           </>
         )}
