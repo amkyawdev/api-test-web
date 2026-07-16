@@ -102,7 +102,7 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const errorMessage: Message = {
         id: generateId(),
         role: 'assistant',
-        content: `Error: ${error instanceof Error ? error.message : 'Failed to get response. Please check your API key and try again.'}`,
+        content: `Error: ${error instanceof Error ? error.message : '⚠️ Response မရရှိပါ။ API key နဲ့ Server settings များကို စစ်ဆေးပါ။'}`,
         timestamp: new Date(),
         model: selectedModel,
       };
