@@ -120,10 +120,32 @@ export const apiService = {
     const response = await fetch(endpoint.url, { method: 'POST', headers, body: JSON.stringify(body) });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.error?.message || errorData.message || errorData.error?.type || '';
-      const errorCode = errorData.error?.code || '';
+      let errorData: Record<string, unknown> = {};
+      let errorText = '';
+      
+      // Try to parse JSON error response
+      try {
+        errorData = await response.json();
+      } catch {
+        // If not JSON, try to get text
+        try {
+          errorText = await response.text();
+        } catch {
+          errorText = '';
+        }
+      }
+      
+      // Extract error information from various possible locations
+      const errorMessage = 
+        (errorData as any)?.error?.message || 
+        (errorData as any)?.message || 
+        (errorData as any)?.error?.type ||
+        (errorData as any)?.type ||
+        errorText || 
+        '';
+      const errorCode = (errorData as any)?.error?.code || (errorData as any)?.code || '';
       const errorStatus = response.status;
+      const errorModel = (errorData as any)?.error?.meta?.model_name || (errorData as any)?.model || model;
       
       // ===== API Key Expired / Invalid Errors =====
       if (
@@ -149,12 +171,15 @@ export const apiService = {
 
       // ===== No Endpoints / Model Not Found =====
       if (
-        errorMessage.includes('No endpoints found') || 
-        errorMessage.includes('model not found') ||
-        errorMessage.includes('model_not_found') ||
-        errorCode.includes('model_not_found')
+        errorMessage.toLowerCase().includes('no endpoints found') || 
+        errorMessage.toLowerCase().includes('model not found') ||
+        errorMessage.toLowerCase().includes('model_not_found') ||
+        errorCode.toLowerCase().includes('model_not_found') ||
+        errorMessage.toLowerCase().includes('does not exist') ||
+        errorMessage.toLowerCase().includes('not found for model') ||
+        errorMessage.toLowerCase().includes('no valid routes')
       ) {
-        throw new Error(`❌ Model မရရှိနိုင်ပါ။\n\nဤ Model သည် သင်၏ အကောင့်တွင် မရရှိနိုင်ပါ။\n\n🔧 ဖြေရှင်းနည်း: အခြား Model တစ်ခုကို ရွေးချယ်ပါ သို့မဟုတ် သင်၏ API အကောင့်တွင် ငွေကြေးထည့်သွင်းပါ။`);
+        throw new Error(`❌ Model မရရှိနိုင်ပါ။\n\n"${errorModel}" သည် သင်၏ API အကောင့်တွင် ရရှိနိုင်မှုမရှိပါ။\n\n🔧 ဖြေရှင်းနည်း:\n• ဤ Model သည် Free tier တွင် မရရှိပါ\n• OpenRouter တွင် Credits $1+ ထည့်သွင်းပါ\n• Free tier Model များဖြစ်သော Gemma, Llama 3.1 8B, Mistral စသည်တို့ကို စမ်းသုံးကြည့်ပါ`);
       }
 
       // ===== Rate Limit Errors =====
@@ -275,10 +300,32 @@ export const apiService = {
       const response = await fetch(endpoint.url, { method: 'POST', headers, body: JSON.stringify(body) });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.error?.message || errorData.message || errorData.error?.type || '';
-        const errorCode = errorData.error?.code || '';
+        let errorData: Record<string, unknown> = {};
+        let errorText = '';
+        
+        // Try to parse JSON error response
+        try {
+          errorData = await response.json();
+        } catch {
+          // If not JSON, try to get text
+          try {
+            errorText = await response.text();
+          } catch {
+            errorText = '';
+          }
+        }
+        
+        // Extract error information from various possible locations
+        const errorMessage = 
+          (errorData as any)?.error?.message || 
+          (errorData as any)?.message || 
+          (errorData as any)?.error?.type ||
+          (errorData as any)?.type ||
+          errorText || 
+          '';
+        const errorCode = (errorData as any)?.error?.code || (errorData as any)?.code || '';
         const errorStatus = response.status;
+        const errorModel = (errorData as any)?.error?.meta?.model_name || (errorData as any)?.model || model;
         
         // ===== API Key Expired / Invalid Errors =====
         if (
@@ -304,13 +351,15 @@ export const apiService = {
 
         // ===== No Endpoints / Model Not Found =====
         if (
-          errorMessage.includes('No endpoints found') || 
-          errorMessage.includes('model not found') ||
-          errorMessage.includes('model_not_found') ||
-          errorCode.includes('model_not_found') ||
-          errorMessage.includes('no valid routes')
+          errorMessage.toLowerCase().includes('no endpoints found') || 
+          errorMessage.toLowerCase().includes('model not found') ||
+          errorMessage.toLowerCase().includes('model_not_found') ||
+          errorCode.toLowerCase().includes('model_not_found') ||
+          errorMessage.toLowerCase().includes('does not exist') ||
+          errorMessage.toLowerCase().includes('not found for model') ||
+          errorMessage.toLowerCase().includes('no valid routes')
         ) {
-          throw new Error(`❌ Model မရရှိနိုင်ပါ။\n\n"${model}" သည် သင်၏ API အကောင့်တွင် ရရှိနိုင်မှုမရှိပါ။\n\n🔧 ဖြေရှင်းနည်း: \n• အခြား Model တစ်ခုကို ရွေးချယ်ပါ\n• OpenRouter တွင် Credits ထည့်သွင်းပါ\n• Free tier Model များဖြစ်သော Gemma, Llama စသည်တို့ကို စမ်းသုံးကြည့်ပါ`);
+          throw new Error(`❌ Model မရရှိနိုင်ပါ။\n\n"${errorModel}" သည် သင်၏ API အကောင့်တွင် ရရှိနိုင်မှုမရှိပါ။\n\n🔧 ဖြေရှင်းနည်း:\n• ဤ Model သည် Free tier တွင် မရရှိပါ\n• OpenRouter တွင် Credits $1+ ထည့်သွင်းပါ\n• Free tier Model များဖြစ်သော Gemma, Llama 3.1 8B, Mistral စသည်တို့ကို စမ်းသုံးကြည့်ပါ`);
         }
 
         // ===== Rate Limit Errors =====
