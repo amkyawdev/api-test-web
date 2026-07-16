@@ -418,12 +418,13 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; letter-spacing: -0.02em; }
   font-size: 4rem;
   display: block;
   animation: iconFloat 3s ease-in-out infinite;
+  filter: grayscale(30%);
 }
 
 .api-icon-ring {
   position: absolute;
   inset: -10px;
-  border: 2px solid var(--primary);
+  border: 2px solid var(--text-muted);
   border-radius: 50%;
   opacity: 0.3;
   animation: ringPulse 2s ease-in-out infinite;
@@ -1516,3 +1517,7 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; letter-spacing: -0.02em; }
 .text-danger { color: var(--error) !important; }
 .text-secondary { color: var(--text-secondary) !important; }
 .text-muted { color: var(--text-muted) !important; }
+
+/* Gray Text Colors */
+.text-gray { color: #9ca3af !important; }
+.text-gray-light { color: #6b7280 !important; }

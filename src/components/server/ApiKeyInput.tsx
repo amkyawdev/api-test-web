@@ -92,13 +92,13 @@ const ApiKeyInput: React.FC = () => {
                 <span className="api-icon">{server.icon}</span>
                 <div className="api-icon-ring"></div>
               </div>
-              <h2 className="fw-bold mt-3 mb-2">{server.name}</h2>
-              <p className="text-secondary mb-0">{server.description}</p>
+              <h2 className="fw-bold mt-3 mb-2 text-gray">{server.name}</h2>
+              <p className="mb-0 text-gray-light">{server.description}</p>
             </div>
 
             {/* API Key Input */}
             <div className="mb-4">
-              <label className="form-label fw-semibold d-flex align-items-center gap-2">
+              <label className="form-label fw-semibold d-flex align-items-center gap-2 text-gray">
                 <i className="bi bi-key-fill"></i>
                 API Key
               </label>
@@ -121,7 +121,7 @@ const ApiKeyInput: React.FC = () => {
                   <i className={`bi bi-${showKey ? 'eye-slash' : 'eye'}`}></i>
                 </button>
               </div>
-              <small className="text-muted mt-2 d-block">
+              <small className="text-gray-light mt-2 d-block">
                 <i className="bi bi-shield-check me-1"></i>
                 Your API key is stored locally in your browser.
               </small>
@@ -153,7 +153,7 @@ const ApiKeyInput: React.FC = () => {
             {/* Models Section */}
             {server.models.length > 0 && (
               <div className="mt-4 pt-4 models-section">
-                <h5 className="mb-3 d-flex align-items-center gap-2">
+                <h5 className="mb-3 d-flex align-items-center gap-2 text-gray">
                   <i className="bi bi-grid-3x3-gap"></i>
                   Available Models
                   <span className="model-count">{server.models.length}</span>
@@ -161,13 +161,13 @@ const ApiKeyInput: React.FC = () => {
                 <div className="models-grid">
                   {server.models.slice(0, 6).map((model, index) => (
                     <div key={model.id} className="model-chip" style={{ animationDelay: `${index * 0.05}s` }}>
-                      <span className="model-name">{model.name}</span>
+                      <span className="model-name text-gray">{model.name}</span>
                       <span className="model-desc">{model.description}</span>
                     </div>
                   ))}
                 </div>
                 {server.models.length > 6 && (
-                  <p className="text-muted text-center mt-3 mb-0 small">
+                  <p className="text-gray-light text-center mt-3 mb-0 small">
                     <i className="bi bi-info-circle me-1"></i>
                     +{server.models.length - 6} more models available
                   </p>
