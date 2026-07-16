@@ -18,6 +18,7 @@ export interface Message {
   content: string;
   timestamp: Date;
   model?: string;
+  thinking?: string; // Reasoning/thinking content
 }
 
 export interface ChatSession {

@@ -75,12 +75,14 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         content: m.content,
       }));
 
-      const response = await apiService.sendMessage(selectedServer, apiKey, selectedModel, apiMessages);
+      // Use sendMessageWithThinking to get both content and thinking
+      const { content, thinking } = await apiService.sendMessageWithThinking(selectedServer, apiKey, selectedModel, apiMessages);
 
       const assistantMessage: Message = {
         id: generateId(),
         role: 'assistant',
-        content: response,
+        content: content,
+        thinking: thinking,
         timestamp: new Date(),
         model: selectedModel,
       };

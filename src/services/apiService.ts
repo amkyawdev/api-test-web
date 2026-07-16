@@ -192,5 +192,151 @@ export const apiService = {
     return content || 'No response';
   },
 
+  sendMessageWithThinking: async (serverId: string, apiKey: string, model: string, messages: { role: string; content: string }[]): Promise<{ content: string; thinking?: string }> => {
+    // Handle DeepSeek reasoning content
+    if (serverId === 'deepseek' || serverId === 'openrouter') {
+      const endpoint = API_ENDPOINTS[serverId];
+      if (!endpoint) throw new Error(`Unsupported server: ${serverId}`);
+
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      let body: Record<string, unknown> = { model, messages };
+
+      if (serverId === 'openrouter') {
+        headers['Authorization'] = `Bearer ${apiKey}`;
+        headers['HTTP-Referer'] = window.location.origin;
+        headers['X-Title'] = 'API Test Hub';
+      } else {
+        headers['Authorization'] = `Bearer ${apiKey}`;
+      }
+
+      const response = await fetch(endpoint.url, { method: 'POST', headers, body: JSON.stringify(body) });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `API Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Try to extract reasoning/thinking content
+      let thinking: string | undefined;
+      let content = '';
+
+      // DeepSeek reasoning format
+      if (data.choices?.[0]?.message?.reasoning) {
+        thinking = data.choices[0].message.reasoning;
+      }
+      // OpenAI o1 style reasoning
+      else if (data.choices?.[0]?.message?.reasoning !== undefined) {
+        thinking = data.choices[0].message.reasoning;
+      }
+      // Anthropic Claude extended thinking
+      else if (data.choices?.[0]?.message?.thinking) {
+        thinking = data.choices[0].message.thinking;
+      }
+      
+      // Extract content
+      if (data.choices?.[0]?.message?.content) {
+        content = data.choices[0].message.content;
+      } else if (data.choices?.[0]?.text) {
+        content = data.choices[0].text;
+      } else if (data.choices?.[0]?.delta?.content) {
+        content = data.choices[0].delta.content;
+      }
+
+      return { content: content || 'No response', thinking };
+    }
+
+    // Default behavior for other servers - use direct fetch logic
+    const endpoint = API_ENDPOINTS[serverId];
+    if (!endpoint) throw new Error(`Unsupported server: ${serverId}`);
+
+    // Ollama special case
+    if (serverId === 'ollama') {
+      const response = await fetch(endpoint.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, messages, stream: false }),
+      });
+      if (!response.ok) throw new Error(`Ollama error: ${response.status}`);
+      const data = await response.json();
+      return { content: data.message?.content || 'No response' };
+    }
+
+    // Gemini special case
+    if (serverId === 'gemini') {
+      const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const response = await fetch(geminiEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: messages.map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] }))
+        }),
+      });
+      if (!response.ok) throw new Error(`Gemini error: ${response.status}`);
+      const data = await response.json();
+      return { content: data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response' };
+    }
+
+    // Claude special case
+    if (serverId === 'claude') {
+      const response = await fetch(endpoint.url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({ model, max_tokens: 4096, messages: messages.map(m => ({ role: m.role, content: m.content })) }),
+      });
+      if (!response.ok) throw new Error(`Claude error: ${response.status}`);
+      const data = await response.json();
+      return { content: data.content?.[0]?.text || 'No response' };
+    }
+
+    // Cohere special case
+    if (serverId === 'cohere') {
+      const response = await fetch(endpoint.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+        body: JSON.stringify({ model, messages: messages.map(m => ({ role: m.role === 'user' ? 'User' : 'Chatbot', message: m.content })) }),
+      });
+      if (!response.ok) throw new Error(`Cohere error: ${response.status}`);
+      const data = await response.json();
+      return { content: data.text || 'No response' };
+    }
+
+    // Standard OpenAI-compatible API
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    headers['Authorization'] = `Bearer ${apiKey}`;
+    let body: Record<string, unknown> = { model, messages };
+
+    // ElevenLabs special case
+    if (serverId === 'elevenlabs') {
+      body = { text: messages[messages.length - 1]?.content, model_id: model };
+    }
+
+    const response = await fetch(endpoint.url, { method: 'POST', headers, body: JSON.stringify(body) });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `API Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Extract response
+    let content = '';
+    if (data.choices?.[0]?.message?.content) {
+      content = data.choices[0].message.content;
+    } else if (data.choices?.[0]?.text) {
+      content = data.choices[0].text;
+    } else if (data.choices?.[0]?.delta?.content) {
+      content = data.choices[0].delta.content;
+    }
+
+    return { content: content || 'No response' };
+  },
+
   getEndpoint: (serverId: string): string | undefined => API_ENDPOINTS[serverId]?.url,
 };
