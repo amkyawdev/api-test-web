@@ -49,7 +49,7 @@ export const apiService = {
 
   sendMessage: async (serverId: string, apiKey: string, model: string, messages: { role: string; content: string }[]): Promise<string> => {
     const endpoint = API_ENDPOINTS[serverId];
-    if (!endpoint) throw new Error(`Unsupported server: ${serverId}`);
+    if (!endpoint) throw new Error(`⚠️ Server မထောက်ပံ့ပါ။: ${serverId}`);
 
     // Ollama special case
     if (serverId === 'ollama') {
@@ -58,7 +58,7 @@ export const apiService = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model, messages, stream: false }),
       });
-      if (!response.ok) throw new Error(`Ollama error: ${response.status}`);
+      if (!response.ok) throw new Error(`⚠️ Ollama အမှား (${response.status}): Server မှာ အမှားဖြစ်နေပါသည်။`);
       const data = await response.json();
       return data.message?.content || 'No response';
     }
@@ -73,7 +73,10 @@ export const apiService = {
           contents: messages.map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] }))
         }),
       });
-      if (!response.ok) throw new Error(`Gemini error: ${response.status}`);
+      if (!response.ok) {
+        if (response.status === 404) throw new Error(`🔍 Gemini Model မရှိပါ။\n\n"${model}" သည် မရှိသော Model ဖြစ်ပါသည်။\n\n🔧 ဖြေရှင်းနည်း: Model ID ကို စစ်ဆေးပါ။`);
+        throw new Error(`⚠️ Gemini အမှား (${response.status}): Server မှာ အမှားဖြစ်နေပါသည်။`);
+      }
       const data = await response.json();
       return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
     }
@@ -89,7 +92,7 @@ export const apiService = {
         },
         body: JSON.stringify({ model, max_tokens: 4096, messages: messages.map(m => ({ role: m.role, content: m.content })) }),
       });
-      if (!response.ok) throw new Error(`Claude error: ${response.status}`);
+      if (!response.ok) throw new Error(`⚠️ Claude အမှား (${response.status}): Server မှာ အမှားဖြစ်နေပါသည်။`);
       const data = await response.json();
       return data.content?.[0]?.text || 'No response';
     }
@@ -101,7 +104,7 @@ export const apiService = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
         body: JSON.stringify({ model, messages: messages.map(m => ({ role: m.role === 'user' ? 'User' : 'Chatbot', message: m.content })) }),
       });
-      if (!response.ok) throw new Error(`Cohere error: ${response.status}`);
+      if (!response.ok) throw new Error(`⚠️ Cohere အမှား (${response.status}): Server မှာ အမှားဖြစ်နေပါသည်။`);
       const data = await response.json();
       return data.text || 'No response';
     }
@@ -457,7 +460,7 @@ export const apiService = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model, messages, stream: false }),
       });
-      if (!response.ok) throw new Error(`Ollama error: ${response.status}`);
+      if (!response.ok) throw new Error(`⚠️ Ollama အမှား (${response.status}): Server မှာ အမှားဖြစ်နေပါသည်။`);
       const data = await response.json();
       return { content: data.message?.content || 'No response' };
     }
@@ -472,7 +475,10 @@ export const apiService = {
           contents: messages.map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] }))
         }),
       });
-      if (!response.ok) throw new Error(`Gemini error: ${response.status}`);
+      if (!response.ok) {
+        if (response.status === 404) throw new Error(`🔍 Gemini Model မရှိပါ။\n\n"${model}" သည် မရှိသော Model ဖြစ်ပါသည်။\n\n🔧 ဖြေရှင်းနည်း: Model ID ကို စစ်ဆေးပါ။`);
+        throw new Error(`⚠️ Gemini အမှား (${response.status}): Server မှာ အမှားဖြစ်နေပါသည်။`);
+      }
       const data = await response.json();
       return { content: data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response' };
     }
@@ -488,7 +494,7 @@ export const apiService = {
         },
         body: JSON.stringify({ model, max_tokens: 4096, messages: messages.map(m => ({ role: m.role, content: m.content })) }),
       });
-      if (!response.ok) throw new Error(`Claude error: ${response.status}`);
+      if (!response.ok) throw new Error(`⚠️ Claude အမှား (${response.status}): Server မှာ အမှားဖြစ်နေပါသည်။`);
       const data = await response.json();
       return { content: data.content?.[0]?.text || 'No response' };
     }
@@ -500,7 +506,7 @@ export const apiService = {
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
         body: JSON.stringify({ model, messages: messages.map(m => ({ role: m.role === 'user' ? 'User' : 'Chatbot', message: m.content })) }),
       });
-      if (!response.ok) throw new Error(`Cohere error: ${response.status}`);
+      if (!response.ok) throw new Error(`⚠️ Cohere အမှား (${response.status}): Server မှာ အမှားဖြစ်နေပါသည်။`);
       const data = await response.json();
       return { content: data.text || 'No response' };
     }
@@ -519,7 +525,7 @@ export const apiService = {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `API Error: ${response.status}`);
+      throw new Error(errorData.error?.message || `⚠️ API အမှား (${response.status}): Server မှာ အမှားဖြစ်နေပါသည်။`);
     }
 
     const data = await response.json();
