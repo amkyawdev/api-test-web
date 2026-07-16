@@ -121,7 +121,23 @@ export const apiService = {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `API Error: ${response.status}`);
+      const errorMessage = errorData.error?.message || errorData.message || `API Error: ${response.status}`;
+      
+      // Provide helpful error messages for common issues
+      if (errorMessage.includes('No endpoints found') || errorMessage.includes('model not found')) {
+        throw new Error(`Model not available: This model may require credits or not be available on your current plan. Try a different model or check your API account.`);
+      }
+      if (errorMessage.includes('invalid_api_key') || errorMessage.includes('Incorrect API key')) {
+        throw new Error(`Invalid API key: Please check your API key and try again.`);
+      }
+      if (errorMessage.includes('rate_limit') || errorMessage.includes('Rate limit')) {
+        throw new Error(`Rate limit exceeded: Please wait a moment and try again.`);
+      }
+      if (errorMessage.includes('insufficient_quota') || errorMessage.includes('quota')) {
+        throw new Error(`Quota exceeded: Your API account has run out of credits. Please add more credits to your account.`);
+      }
+      
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();

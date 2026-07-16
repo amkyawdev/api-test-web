@@ -123,10 +123,11 @@ export const SERVERS: Server[] = [
       { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet', description: 'Via OpenRouter' },
       { id: 'openai/gpt-4o', name: 'GPT-4o', description: 'Via OpenRouter' },
       { id: 'google/gemini-pro-1.5', name: 'Gemini Pro 1.5', description: 'Via OpenRouter' },
-      { id: 'meta-llama/llama-3.1-405b', name: 'Llama 3.1 405B', description: 'Via OpenRouter' },
-      { id: 'mistralai/mixtral-8x22b', name: 'Mixtral 8x22B', description: 'Via OpenRouter' },
-      { id: 'deepseek/deepseek-chat', name: 'DeepSeek Chat', description: 'Via OpenRouter' },
-      { id: 'perplexity/llama-3.1-sonar-large', name: 'Perplexity Sonar', description: 'Via OpenRouter' },
+      { id: 'meta-llama/llama-3.1-405b-instruct', name: 'Llama 3.1 405B', description: 'Free tier available' },
+      { id: 'mistralai/mixtral-8x22b-instruct', name: 'Mixtral 8x22B', description: 'Via OpenRouter' },
+      { id: 'deepseek/deepseek-chat-v3', name: 'DeepSeek Chat V3', description: 'Via OpenRouter' },
+      { id: 'perplexity/llama-3.1-sonar-large-128k-online', name: 'Perplexity Sonar', description: 'Web search enabled' },
+      { id: 'google/gemma-2-9b-it', name: 'Gemma 2 9B', description: 'Free tier available' },
     ] 
   },
   { 
