@@ -19,6 +19,13 @@ const API_ENDPOINTS: Record<string, { url: string; method: string }> = {
   'minimax': { url: 'https://api.minimax.chat/v1/text/chatcompletion_v2', method: 'POST' },
   'elevenlabs': { url: 'https://api.elevenlabs.io/v1/text-to-speech', method: 'POST' },
   'nvidia': { url: 'https://integrate.api.nvidia.com/v1/chat/completions', method: 'POST' },
+  // New Providers
+  'fireworks': { url: 'https://api.fireworks.ai/inference/v1/chat/completions', method: 'POST' },
+  'replicate': { url: 'https://api.replicate.com/v1/predictions', method: 'POST' },
+  'cloudflare': { url: 'https://api.cloudflare.com/client/v4/accounts/workers/ai/run', method: 'POST' },
+  'lepton': { url: 'https://api.lepton.ai/v1/chat/completions', method: 'POST' },
+  'novita': { url: 'https://api.novita.ai/v3/chat/completions', method: 'POST' },
+  'hyperbolic': { url: 'https://api.hyperbolic.xyz/v1/chat/completions', method: 'POST' },
 };
 
 export const apiService = {

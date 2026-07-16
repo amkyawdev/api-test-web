@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getServerById } from '../../types/api.types';
+import { ALL_SERVERS } from '../../types/api.types';
 import { apiService } from '../../services/apiService';
 import { storageService } from '../../services/storageService';
 import { useChat } from '../../contexts/ChatContext';
@@ -14,8 +14,11 @@ const ApiKeyInput: React.FC = () => {
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [showTestDialog, setShowTestDialog] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [showKey, setShowKey] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
-  const server = serverId ? getServerById(serverId) : null;
+  // Search in ALL_SERVERS
+  const server = serverId ? ALL_SERVERS.find(s => s.id === serverId) : null;
 
   useEffect(() => {
     if (serverId) {
@@ -32,6 +35,7 @@ const ApiKeyInput: React.FC = () => {
 
     setShowTestDialog(true);
     setTestResult(null);
+    setIsLoading(true);
 
     try {
       const result = await apiService.testApiKey(serverId!, apiKeyInput);
@@ -44,6 +48,8 @@ const ApiKeyInput: React.FC = () => {
       }
     } catch (error) {
       setTestResult({ success: false, message: 'Connection test failed. Please try again.' });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,13 +58,25 @@ const ApiKeyInput: React.FC = () => {
     setShowTestDialog(false);
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && apiKeyInput.trim()) {
+      handleTestConnection();
+    }
+  };
+
   if (!server) {
     return (
       <div className="container py-5 text-center">
-        <h2>Server not found</h2>
-        <button className="btn btn-gradient mt-3" onClick={() => navigate('/')}>
-          Back to Servers
-        </button>
+        <div className="error-state">
+          <div className="error-icon">
+            <i className="bi bi-exclamation-triangle"></i>
+          </div>
+          <h2>Server not found</h2>
+          <p className="text-secondary">The server you're looking for doesn't exist.</p>
+          <button className="btn btn-gradient mt-3" onClick={() => navigate('/')}>
+            <i className="bi bi-arrow-left me-2"></i>Back to Servers
+          </button>
+        </div>
       </div>
     );
   }
@@ -68,29 +86,48 @@ const ApiKeyInput: React.FC = () => {
       <div className="row justify-content-center">
         <div className="col-12 col-md-8 col-lg-6">
           <div className="glass-card p-4 p-md-5">
-            <div className="text-center mb-4">
-              <span className="server-icon">{server.icon}</span>
-              <h2 className="fw-bold mt-3">{server.name}</h2>
-              <p className="text-secondary">{server.description}</p>
+            {/* Header */}
+            <div className="api-header text-center mb-4">
+              <div className="api-icon-wrapper">
+                <span className="api-icon">{server.icon}</span>
+                <div className="api-icon-ring"></div>
+              </div>
+              <h2 className="fw-bold mt-3 mb-2">{server.name}</h2>
+              <p className="text-secondary mb-0">{server.description}</p>
             </div>
 
+            {/* API Key Input */}
             <div className="mb-4">
-              <label className="form-label fw-semibold">
-                <i className="bi bi-key me-2"></i>API Key
+              <label className="form-label fw-semibold d-flex align-items-center gap-2">
+                <i className="bi bi-key-fill"></i>
+                API Key
               </label>
-              <input
-                type="password"
-                className="input-glass"
-                placeholder="Enter your API key..."
-                value={apiKeyInput}
-                onChange={(e) => setApiKeyInput(e.target.value)}
-                autoComplete="off"
-              />
+              <div className="input-wrapper">
+                <input
+                  type={showKey ? 'text' : 'password'}
+                  className="input-glass"
+                  placeholder="Enter your API key..."
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  autoComplete="off"
+                />
+                <button 
+                  type="button"
+                  className="input-toggle"
+                  onClick={() => setShowKey(!showKey)}
+                  title={showKey ? 'Hide key' : 'Show key'}
+                >
+                  <i className={`bi bi-${showKey ? 'eye-slash' : 'eye'}`}></i>
+                </button>
+              </div>
               <small className="text-muted mt-2 d-block">
+                <i className="bi bi-shield-check me-1"></i>
                 Your API key is stored locally in your browser.
               </small>
             </div>
 
+            {/* Action Buttons */}
             <div className="d-flex gap-3 flex-column flex-sm-row">
               <button className="btn btn-ghost flex-grow-1" onClick={() => navigate('/')}>
                 <i className="bi bi-arrow-left me-2"></i>Back
@@ -98,29 +135,51 @@ const ApiKeyInput: React.FC = () => {
               <button
                 className="btn btn-gradient flex-grow-1"
                 onClick={handleTestConnection}
-                disabled={!apiKeyInput.trim()}
+                disabled={!apiKeyInput.trim() || isLoading}
               >
-                <i className="bi bi-plug me-2"></i>Test & Connect
+                {isLoading ? (
+                  <>
+                    <span className="spinner-small"></span>
+                    Testing...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-plug me-2"></i>Test & Connect
+                  </>
+                )}
               </button>
             </div>
 
+            {/* Models Section */}
             {server.models.length > 0 && (
-              <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
-                <h5 className="mb-3"><i className="bi bi-cpu me-2"></i>Available Models</h5>
-                <div className="d-flex flex-wrap gap-2">
-                  {server.models.slice(0, 5).map((model) => (
-                    <span key={model.id} className="badge" style={{ background: 'var(--bg-glass)', padding: '0.5rem 1rem', borderRadius: '20px' }}>
-                      {model.name}
-                    </span>
+              <div className="mt-4 pt-4 models-section">
+                <h5 className="mb-3 d-flex align-items-center gap-2">
+                  <i className="bi bi-grid-3x3-gap"></i>
+                  Available Models
+                  <span className="model-count">{server.models.length}</span>
+                </h5>
+                <div className="models-grid">
+                  {server.models.slice(0, 6).map((model, index) => (
+                    <div key={model.id} className="model-chip" style={{ animationDelay: `${index * 0.05}s` }}>
+                      <span className="model-name">{model.name}</span>
+                      <span className="model-desc">{model.description}</span>
+                    </div>
                   ))}
-                  {server.models.length > 5 && (
-                    <span className="badge" style={{ background: 'var(--bg-glass)', padding: '0.5rem 1rem', borderRadius: '20px' }}>
-                      +{server.models.length - 5} more
-                    </span>
-                  )}
                 </div>
+                {server.models.length > 6 && (
+                  <p className="text-muted text-center mt-3 mb-0 small">
+                    <i className="bi bi-info-circle me-1"></i>
+                    +{server.models.length - 6} more models available
+                  </p>
+                )}
               </div>
             )}
+
+            {/* Security Note */}
+            <div className="security-note mt-4">
+              <i className="bi bi-lock-fill"></i>
+              <span>Your API key is encrypted and stored only in your browser's local storage.</span>
+            </div>
           </div>
         </div>
       </div>

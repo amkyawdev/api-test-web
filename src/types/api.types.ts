@@ -16,6 +16,8 @@ export const SERVERS: Server[] = [
     description: "Google's AI model family", 
     models: [
       { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash', description: 'Latest fast model' },
+      { id: 'gemini-2.0-flash-thinking', name: 'Gemini 2.0 Flash Thinking', description: 'With thinking capability' },
+      { id: 'gemini-2.0-pro-exp', name: 'Gemini 2.0 Pro', description: 'Most capable' },
       { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', description: 'Fast and efficient' },
       { id: 'gemini-1.5-flash-8b', name: 'Gemini 1.5 Flash 8B', description: 'Lightweight version' },
       { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', description: 'Most capable' },
@@ -43,11 +45,13 @@ export const SERVERS: Server[] = [
     icon: '🔍', 
     description: 'Deep search and reasoning AI', 
     models: [
-      { id: 'deepseek-chat', name: 'DeepSeek Chat', description: 'General conversation' },
+      { id: 'deepseek-chat', name: 'DeepSeek Chat V3', description: 'Latest general conversation' },
+      { id: 'deepseek-chat-v2.5', name: 'DeepSeek Chat V2.5', description: 'Previous version' },
       { id: 'deepseek-coder', name: 'DeepSeek Coder', description: 'Code specialist' },
       { id: 'deepseek-coder-33b', name: 'DeepSeek Coder 33B', description: 'Large code model' },
       { id: 'deepseek-math', name: 'DeepSeek Math', description: 'Math reasoning' },
       { id: 'deepseek-prover', name: 'DeepSeek Prover', description: 'Formal math proof' },
+      { id: 'deepseek-reasoner', name: 'DeepSeek Reasoner', description: 'Advanced reasoning' },
     ] 
   },
   { 
@@ -64,6 +68,7 @@ export const SERVERS: Server[] = [
       { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast and efficient' },
       { id: 'o1-preview', name: 'o1 Preview', description: 'Reasoning model' },
       { id: 'o1-mini', name: 'o1 Mini', description: 'Fast reasoning' },
+      { id: 'o1', name: 'o1', description: 'Full o1 model' },
     ] 
   },
   { 
@@ -301,3 +306,84 @@ export const getModelById = (modelId: string): Model | undefined => {
 export const getServerByModelId = (modelId: string): Server | undefined => {
   return SERVERS.find(s => s.models.some(m => m.id === modelId));
 };
+
+// New AI Providers
+const NEW_SERVERS: Server[] = [
+  {
+    id: 'fireworks',
+    name: 'Fireworks AI',
+    icon: '🔥',
+    description: 'Fast AI inference platform',
+    models: [
+      { id: 'accounts/fireworks/models/llama-v3p1-70b-instruct', name: 'Llama 3.1 70B', description: 'Fast inference' },
+      { id: 'accounts/fireworks/models/llama-v3p1-405b-instruct', name: 'Llama 3.1 405B', description: 'Largest model' },
+      { id: 'accounts/fireworks/models/llama-v3p2-90b-instruct', name: 'Llama 3.2 90B Vision', description: 'Vision capable' },
+      { id: 'accounts/fireworks/models/qwen2p5-72b-instruct', name: 'Qwen 2.5 72B', description: 'Chinese model' },
+      { id: 'accounts/fireworks/models/mixtral-8x22b-instruct', name: 'Mixtral 8x22B', description: 'MoE model' },
+      { id: 'accounts/fireworks/models/deepseek-v3', name: 'DeepSeek V3', description: 'Latest DeepSeek' },
+    ]
+  },
+  {
+    id: 'replicate',
+    name: 'Replicate',
+    icon: '🔄',
+    description: 'AI model hosting platform',
+    models: [
+      { id: 'meta/meta-llama-3-70b-instruct', name: 'Llama 3 70B', description: 'Meta flagship' },
+      { id: 'meta/meta-llama-3-8b-instruct', name: 'Llama 3 8B', description: 'Efficient model' },
+      { id: 'mistralai/mixtral-8x22b-instruct', name: 'Mixtral 8x22B', description: 'MoE model' },
+      { id: ' NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO', name: 'Nous Hermes 2', description: 'Fine-tuned Mixtral' },
+    ]
+  },
+  {
+    id: 'cloudflare',
+    name: 'Cloudflare Workers AI',
+    icon: '☁️',
+    description: 'Edge AI inference',
+    models: [
+      { id: '@cf/meta/llama-3-8b-instruct', name: 'Llama 3 8B', description: 'Edge optimized' },
+      { id: '@cf/meta/llama-3-70b-instruct', name: 'Llama 3 70B', description: 'Large edge model' },
+      { id: '@cf/mistral/mistral-7b-instruct', name: 'Mistral 7B', description: 'Fast inference' },
+      { id: '@cf/thebloke/mistral-7b-instruct-gptq', name: 'Mistral 7B GPTQ', description: 'Quantized version' },
+    ]
+  },
+  {
+    id: 'lepton',
+    name: 'Lepton AI',
+    icon: '⚡',
+    description: 'Fast AI inference',
+    models: [
+      { id: 'llama-3.1-70b', name: 'Llama 3.1 70B', description: 'Fast inference' },
+      { id: 'llama-3.1-405b', name: 'Llama 3.1 405B', description: 'Largest model' },
+      { id: 'qwen2.5-72b', name: 'Qwen 2.5 72B', description: 'Chinese model' },
+      { id: 'mixtral-8x22b', name: 'Mixtral 8x22B', description: 'MoE model' },
+    ]
+  },
+  {
+    id: 'novita',
+    name: 'Novita AI',
+    icon: '🚀',
+    description: 'AI model hosting',
+    models: [
+      { id: 'meta-llama/llama-3-70b-instruct', name: 'Llama 3 70B', description: 'Meta flagship' },
+      { id: 'meta-llama/llama-3.1-405b-instruct', name: 'Llama 3.1 405B', description: 'Largest model' },
+      { id: 'deepseek-ai/deepseek-v3', name: 'DeepSeek V3', description: 'Latest DeepSeek' },
+      { id: 'qwen/qwen-2.5-72b-instruct', name: 'Qwen 2.5 72B', description: 'Chinese model' },
+    ]
+  },
+  {
+    id: 'hyperbolic',
+    name: 'Hyperbolic',
+    icon: '🌊',
+    description: 'Affordable AI inference',
+    models: [
+      { id: 'meta-llama/Llama-3.1-70B-Instruct', name: 'Llama 3.1 70B', description: 'Affordable large model' },
+      { id: 'meta-llama/Llama-3.1-405B-Instruct', name: 'Llama 3.1 405B', description: 'Most capable' },
+      { id: 'Qwen/Qwen2.5-72B-Instruct', name: 'Qwen 2.5 72B', description: 'Chinese model' },
+      { id: 'mistralai/Mixtral-8x22B-Instruct', name: 'Mixtral 8x22B', description: 'MoE model' },
+    ]
+  },
+];
+
+// Combine all servers
+export const ALL_SERVERS: Server[] = [...SERVERS, ...NEW_SERVERS];
