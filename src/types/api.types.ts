@@ -392,7 +392,7 @@ export const SERVERS: Server[] = [
 ];
 
 export const getServerById = (id: string): Server | undefined => {
-  return SERVERS.find(s => s.id === id);
+  return ALL_SERVERS.find(s => s.id === id);
 };
 
 export const getModelsByServer = (serverId: string): Model[] => {
@@ -401,7 +401,7 @@ export const getModelsByServer = (serverId: string): Model[] => {
 };
 
 export const getAllModels = (): Model[] => {
-  return SERVERS.flatMap(s => s.models);
+  return ALL_SERVERS.flatMap(s => s.models);
 };
 
 export const getModelById = (modelId: string): Model | undefined => {
@@ -409,7 +409,7 @@ export const getModelById = (modelId: string): Model | undefined => {
 };
 
 export const getServerByModelId = (modelId: string): Server | undefined => {
-  return SERVERS.find(s => s.models.some(m => m.id === modelId));
+  return ALL_SERVERS.find(s => s.models.some(m => m.id === modelId));
 };
 
 // New AI Providers

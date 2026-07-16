@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useChat } from '../contexts/ChatContext';
-import { getServerById, getModelsByServer } from '../types/api.types';
+import { ALL_SERVERS } from '../types/api.types';
 import { storageService } from '../services/storageService';
 import ChatHeader from '../components/chat/ChatHeader';
 import ChatMessages from '../components/chat/ChatMessages';
@@ -14,8 +14,15 @@ const Chat: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showModelDropdown, setShowModelDropdown] = useState(false);
 
-  const server = selectedServer ? getServerById(selectedServer) : null;
-  const models = selectedServer ? getModelsByServer(selectedServer) : [];
+  // Use ALL_SERVERS to include new providers like Novita AI
+  const getServerFromAll = (id: string) => ALL_SERVERS.find(s => s.id === id);
+  const getModelsFromAll = (serverId: string) => {
+    const server = getServerFromAll(serverId);
+    return server?.models || [];
+  };
+
+  const server = selectedServer ? getServerFromAll(selectedServer) : null;
+  const models = selectedServer ? getModelsFromAll(selectedServer) : [];
   const selectedModelData = models.find(m => m.id === selectedModel);
 
   useEffect(() => {
