@@ -1,26 +1,87 @@
 import type { ApiTestResult } from '../types/api.types';
 
-// API endpoints for different services
-const API_ENDPOINTS: Record<string, string> = {
-  openai: 'https://api.openai.com/v1/chat/completions',
-  gemini: 'https://generativelanguage.googleapis.com/v1beta/models',
-  claude: 'https://api.anthropic.com/v1/messages',
-  deepseek: 'https://api.deepseek.com/chat/completions',
-  ollama: 'http://localhost:11434/api/chat',
-  groq: 'https://api.groq.com/openai/v1/chat/completions',
-  together: 'https://api.together.xyz/v1/chat/completions',
-  openrouter: 'https://openrouter.ai/api/v1/chat/completions',
-  cerebras: 'https://api.cerebras.ai/v1/chat/completions',
-  perplexity: 'https://api.perplexity.ai/chat/completions',
-  minimax: 'https://api.minimax.chat/v1/text/chat_completion_pro',
-  cohere: 'https://api.cohere.ai/v1/chat',
-  mistral: 'https://api.mistral.ai/v1/chat/completions',
-  anyscale: 'https://api.endpoints.anyscale.com/v1/chat/completions',
-  elevenlabs: 'https://api.elevenlabs.io/v1/text-to-speech',
-  grok: 'https://api.x.ai/v1/chat/completions',
-  aws: 'https://{region}.bedrock.amazonaws.com/bedrock/{model}',
-  azure: 'https://{resource}.openai.azure.com/openai/deployments/{deployment}/chat/completions',
-  vertex: 'https://{project}.{location}.aiplatform.googleapis.com/v1/projects/{project}/locations/{location}/publishers/google/models/{model}:predict',
+// Real API Endpoints
+const API_ENDPOINTS: Record<string, { url: string; method: string }> = {
+  // OpenAI
+  'openai': {
+    url: 'https://api.openai.com/v1/chat/completions',
+    method: 'POST'
+  },
+  // Google Gemini
+  'gemini': {
+    url: 'https://generativelanguage.googleapis.com/v1beta/models',
+    method: 'POST'
+  },
+  // Anthropic Claude
+  'claude': {
+    url: 'https://api.anthropic.com/v1/messages',
+    method: 'POST'
+  },
+  // DeepSeek
+  'deepseek': {
+    url: 'https://api.deepseek.com/chat/completions',
+    method: 'POST'
+  },
+  // Groq
+  'groq': {
+    url: 'https://api.groq.com/openai/v1/chat/completions',
+    method: 'POST'
+  },
+  // Together AI
+  'together': {
+    url: 'https://api.together.xyz/v1/chat/completions',
+    method: 'POST'
+  },
+  // OpenRouter
+  'openrouter': {
+    url: 'https://openrouter.ai/api/v1/chat/completions',
+    method: 'POST'
+  },
+  // Perplexity
+  'perplexity': {
+    url: 'https://api.perplexity.ai/chat/completions',
+    method: 'POST'
+  },
+  // Mistral AI
+  'mistral': {
+    url: 'https://api.mistral.ai/v1/chat/completions',
+    method: 'POST'
+  },
+  // Cohere
+  'cohere': {
+    url: 'https://api.cohere.ai/v1/chat',
+    method: 'POST'
+  },
+  // Cerebras
+  'cerebras': {
+    url: 'https://api.cerebras.ai/v1/chat/completions',
+    method: 'POST'
+  },
+  // xAI Grok
+  'grok': {
+    url: 'https://api.x.ai/v1/chat/completions',
+    method: 'POST'
+  },
+  // Anyscale
+  'anyscale': {
+    url: 'https://api.endpoints.anyscale.com/v1/chat/completions',
+    method: 'POST'
+  },
+  // Ollama (Local)
+  'ollama': {
+    url: 'http://localhost:11434/api/chat',
+    method: 'POST'
+  },
+  // MiniMax
+  'minimax': {
+    url: 'https://api.minimax.chat/v1/text/chatcompletion_v2',
+    method: 'POST'
+  },
+  // ElevenLabs
+  'elevenlabs': {
+    url: 'https://api.elevenlabs.io/v1/text-to-speech',
+    method: 'POST'
+  },
 };
 
 export const apiService = {
@@ -29,13 +90,8 @@ export const apiService = {
     const startTime = Date.now();
     
     try {
-      // For demo/testing, simulate validation
-      // In production, this would make actual API calls to verify the key
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
       const latency = Date.now() - startTime;
-      
-      // Basic validation - key should be reasonable length
       const isValid = apiKey.length >= 10 && !apiKey.includes(' ');
       
       return {
@@ -71,76 +127,75 @@ export const apiService = {
       throw new Error(`Unsupported server: ${serverId}`);
     }
 
-    // Build headers based on server
+    // Ollama special case - local server
+    if (serverId === 'ollama') {
+      const response = await fetch(endpoint.url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, messages, stream: false }),
+      });
+      
+      if (!response.ok) throw new Error(`Ollama error: ${response.status}`);
+      const data = await response.json();
+      return data.message?.content || 'No response';
+    }
+
+    // Build headers
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
 
     let body: Record<string, unknown> = {};
-    
+
     switch (serverId) {
       case 'openai':
+      case 'groq':
+      case 'together':
+      case 'deepseek':
+      case 'perplexity':
+      case 'cerebras':
+      case 'anyscale':
+      case 'mistral':
         headers['Authorization'] = `Bearer ${apiKey}`;
         body = { model, messages };
         break;
-        
-      case 'azure':
-        headers['api-key'] = apiKey;
-        headers['Content-Type'] = 'application/json';
-        body = { messages };
-        break;
-        
+
       case 'claude':
         headers['x-api-key'] = apiKey;
         headers['anthropic-version'] = '2023-06-01';
-        headers['Content-Type'] = 'application/json';
         body = {
           model,
           max_tokens: 4096,
           messages: messages.map(m => ({ role: m.role, content: m.content }))
         };
         break;
-        
+
       case 'gemini':
         headers['Authorization'] = `Bearer ${apiKey}`;
-        body = {
-          contents: messages.map(m => ({
-            role: m.role === 'user' ? 'user' : 'model',
-            parts: [{ text: m.content }]
-          }))
-        };
-        break;
+        const geminiModel = model.includes('gemini') ? model : `${model}`;
+        const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`;
+        const geminiResponse = await fetch(geminiEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: messages.map(m => ({
+              role: m.role === 'user' ? 'user' : 'model',
+              parts: [{ text: m.content }]
+            }))
+          }),
+        });
         
-      case 'ollama':
-        body = {
-          model,
-          messages,
-          stream: false
-        };
-        break;
-        
-      case 'groq':
-        headers['Authorization'] = `Bearer ${apiKey}`;
-        body = { model, messages };
-        break;
-        
-      case 'together':
-        headers['Authorization'] = `Bearer ${apiKey}`;
-        body = { model, messages };
-        break;
-        
+        if (!geminiResponse.ok) throw new Error(`Gemini API error: ${geminiResponse.status}`);
+        const geminiData = await geminiResponse.json();
+        return geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
+
       case 'openrouter':
         headers['Authorization'] = `Bearer ${apiKey}`;
         headers['HTTP-Referer'] = window.location.origin;
         headers['X-Title'] = 'API Test Hub';
         body = { model, messages };
         break;
-        
-      case 'deepseek':
-        headers['Authorization'] = `Bearer ${apiKey}`;
-        body = { model, messages };
-        break;
-        
+
       case 'cohere':
         headers['Authorization'] = `Bearer ${apiKey}`;
         body = { 
@@ -148,20 +203,27 @@ export const apiService = {
           messages: messages.map(m => ({ role: m.role === 'user' ? 'User' : 'Chatbot', message: m.content }))
         };
         break;
-        
+
+      case 'grok':
+        headers['Authorization'] = `Bearer ${apiKey}`;
+        body = { model, messages };
+        break;
+
+      case 'minimax':
+        headers['Authorization'] = `Bearer ${apiKey}`;
+        body = {
+          model,
+          messages: messages.map(m => ({ role: m.role, content: m.content })),
+        };
+        break;
+
       default:
         headers['Authorization'] = `Bearer ${apiKey}`;
         body = { model, messages };
     }
 
-    // For servers that don't need real API calls (demo mode)
-    if (serverId === 'ollama' && apiKey === 'demo') {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      return `This is a demo response from ${model}. In production, enter your ${serverId} API key to get real responses.`;
-    }
-
-    // Make the actual API call
-    const response = await fetch(endpoint, {
+    // Make API call
+    const response = await fetch(endpoint.url, {
       method: 'POST',
       headers,
       body: JSON.stringify(body),
@@ -180,33 +242,25 @@ export const apiService = {
       case 'groq':
       case 'together':
       case 'deepseek':
-      case 'openrouter':
-      case 'cerebras':
       case 'perplexity':
-      case 'mistral':
+      case 'cerebras':
       case 'anyscale':
+      case 'mistral':
       case 'grok':
         return data.choices?.[0]?.message?.content || 'No response';
-        
+
       case 'claude':
         return data.content?.[0]?.text || 'No response';
-        
-      case 'gemini':
-        return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
-        
-      case 'ollama':
-        return data.message?.content || 'No response';
-        
+
       case 'cohere':
         return data.text || 'No response';
-        
+
       default:
         return JSON.stringify(data).substring(0, 500);
     }
   },
 
-  // Get available models for a server
   getEndpoint: (serverId: string): string | undefined => {
-    return API_ENDPOINTS[serverId];
+    return API_ENDPOINTS[serverId]?.url;
   },
 };
