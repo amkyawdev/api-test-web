@@ -25,17 +25,11 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const useChat = () => {
   const context = useContext(ChatContext);
-  if (!context) {
-    throw new Error('useChat must be used within ChatProvider');
-  }
+  if (!context) throw new Error('useChat must be used within ChatProvider');
   return context;
 };
 
-interface ChatProviderProps {
-  children: ReactNode;
-}
-
-export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
+export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
@@ -45,17 +39,15 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
 
   const generateId = () => Math.random().toString(36).substring(2, 15);
 
-  const createNewSession = useCallback((): ChatSession => {
-    return {
-      id: generateId(),
-      title: 'New Chat',
-      messages: [],
-      serverId: selectedServer,
-      modelId: selectedModel,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-  }, [selectedServer, selectedModel]);
+  const createNewSession = useCallback((): ChatSession => ({
+    id: generateId(),
+    title: 'New Chat',
+    messages: [],
+    serverId: selectedServer,
+    modelId: selectedModel,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }), [selectedServer, selectedModel]);
 
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim() || isLoading) return;
@@ -69,25 +61,21 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
     };
 
     let session = currentSession || createNewSession();
-    
     const updatedMessages = [...session.messages, userMessage];
-    session = {
-      ...session,
-      messages: updatedMessages,
-      updatedAt: new Date(),
-    };
+    session = { ...session, messages: updatedMessages, updatedAt: new Date() };
     
     setMessages(updatedMessages);
     setCurrentSession(session);
     setIsLoading(true);
 
     try {
-      const response = await apiService.sendMessage(
-        selectedServer,
-        apiKey,
-        selectedModel,
-        content
-      );
+      // Convert messages to API format
+      const apiMessages = updatedMessages.map(m => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      const response = await apiService.sendMessage(selectedServer, apiKey, selectedModel, apiMessages);
 
       const assistantMessage: Message = {
         id: generateId(),
@@ -112,7 +100,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
       const errorMessage: Message = {
         id: generateId(),
         role: 'assistant',
-        content: 'Sorry, there was an error processing your request. Please try again.',
+        content: `Error: ${error instanceof Error ? error.message : 'Failed to get response. Please check your API key and try again.'}`,
         timestamp: new Date(),
         model: selectedModel,
       };
@@ -164,23 +152,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <ChatContext.Provider
-      value={{
-        messages,
-        isLoading,
-        currentSession,
-        selectedModel,
-        selectedServer,
-        apiKey,
-        sendMessage,
-        clearMessages,
-        setSelectedModel,
-        loadSession,
-        startNewChat,
-        setSelectedServer,
-        setApiKey,
-      }}
-    >
+    <ChatContext.Provider value={{
+      messages, isLoading, currentSession, selectedModel, selectedServer, apiKey,
+      sendMessage, clearMessages, setSelectedModel, loadSession, startNewChat, setSelectedServer, setApiKey,
+    }}>
       {children}
     </ChatContext.Provider>
   );
