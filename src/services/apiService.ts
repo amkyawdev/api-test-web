@@ -173,7 +173,7 @@ export const apiService = {
         errorCode.includes('invalid_api_key') ||
         errorMessage.includes('api_key_invalid')
       ) {
-        throw new Error(`❌ API Key Error!\n\nYour API key is invalid or incorrect.\n\n🔧 Solution: Please check and re-enter your API key.`);
+        throw new Error(`❌ API Key Error!\n\nသင်၏ API key မှာ မှားယွင်းနေပါသည်။\n\n🔧 ဖြေရှင်းနည်း: API key ကို စစ်ဆေးပြီး ပြန်လည်ထည့်သွင်းပါ။`);
       }
 
       // ===== No Endpoints / Model Not Found =====
@@ -353,7 +353,7 @@ export const apiService = {
           errorCode.includes('invalid_api_key') ||
           errorMessage.includes('api_key_invalid')
         ) {
-          throw new Error(`❌ API Key Error!\n\nYour API key is invalid or incorrect.\n\n🔧 Solution: Please check and re-enter your API key.`);
+          throw new Error(`❌ API Key Error!\n\nသင်၏ API key မှာ မှားယွင်းနေပါသည်။\n\n🔧 ဖြေရှင်းနည်း: API key ကို စစ်ဆေးပြီး ပြန်လည်ထည့်သွင်းပါ။`);
         }
 
         // ===== No Endpoints / Model Not Found =====
