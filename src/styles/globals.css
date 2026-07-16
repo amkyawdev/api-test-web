@@ -759,6 +759,40 @@ h1, h2, h3, h4, h5, h6 { font-weight: 700; letter-spacing: -0.02em; }
 
 .message.user .message-text { color: white; }
 
+/* Error Message Styles */
+.message.error .message-content,
+.message-content.error-content {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 16px;
+}
+
+.message.error .message-avatar {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(248, 113, 113, 0.2));
+  color: var(--error);
+}
+
+.message.error .message-avatar i {
+  font-size: 1.25rem;
+}
+
+.message-text.error-text {
+  color: var(--error);
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.message.error {
+  animation: shakeError 0.4s ease-in-out;
+}
+
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
 .message-time {
   display: flex;
   align-items: center;
